@@ -26,10 +26,7 @@ app.post('/api/contract', async (req, res) => {
   //       After that the application should keep track of the contract address.
   try {
     let postRes = await swaggerClient.apis.default.constructor_post({
-      body: {
-        // Here we set the constructor parameters
-        x: req.body.x || 'initial value'
-      },
+      body: {},
       "kld-from": FROM_ADDRESS,
       "kld-sync": "true"
     });
@@ -40,6 +37,45 @@ app.post('/api/contract', async (req, res) => {
     res.status(500).send({error: `${err.response && JSON.stringify(err.response.body)}\n${err.stack}`});
   }
 });
+
+app.post('/api/:address/product', async (req, res) => {
+  console.log("Address is: " + req.params.address);
+  console.log("Name is: " + req.body.name);
+  console.log("Manufacturuer is: " + req.body.manufacturer);
+
+  try {
+    let postRes = await swaggerClient.apis.default.addProduct_post({
+      address: req.params.address,
+      body: {
+        _name: req.body.name,
+        _manufacturer: req.body.manufacturer
+      },
+      "kld-from": FROM_ADDRESS,
+      "kld-sync": "true"
+    });
+    res.status(200).send(postRes.body)
+  }
+  catch(err) {
+    console.log("Marina error: " + JSON.stringify(err));
+    res.status(500).send({error: `${err.response && JSON.stringify(err.response.body) && err.response.text}\n${err.stack}`});
+  }
+});
+
+app.get('/api/:address/product/:id', async (req, res) => {
+  try {
+    let postRes = await swaggerClient.apis.default.getProduct_get({
+      address: req.params.address,
+      _productId: req.params.id,
+      "kld-from": FROM_ADDRESS,
+      "kld-sync": "true"
+    });
+    res.status(200).send(postRes.body)
+  }
+  catch(err) {
+    res.status(500).send({error: `${err.response && JSON.stringify(err.response.body) && err.response.text}\n${err.stack}`});
+  }
+});
+
 
 app.post('/api/contract/:address/value', async (req, res) => {
   try {

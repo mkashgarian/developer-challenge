@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import logo from './logo.svg';
 import './App.css';
+import ProductSearch from './components/ProductSearch.tsx';
+import AddProduct from './components/AddProduct.tsx';
+import AddScore from './components/AddScore.tsx';
 
 function App() {
 
@@ -79,27 +82,36 @@ function App() {
   }
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" aria-busy={loading}/>        
-        <p>
-          <button type="button" className="App-button" disabled={loading} onClick={deployContract}>{deployState} Contract</button>
-        </p>
-        { contractAddress && <p>
-          Contract Address: {contractAddress}
-        </p>}
-        <p>
-          <input className="App-input" disabled={loading || !contractAddress} onChange={handleChange}/>
-          <button type="button" className="App-button" disabled={loading || !contractAddress || !desiredValue} onClick={setContractValue}>Set Value</button>
-        </p>
-        <p>
-          <button type="button" className="App-button" disabled={loading || !contractAddress} onClick={getContractValue}>{value}</button>
-        </p>
-        { errorMsg && <pre class="App-error">
-          Error: {errorMsg}
-        </pre>}
-      </header>
+    <div>
+      <button type="button" className="App-button" disabled={loading} onClick={deployContract}>{deployState} Contract</button>
+      { contractAddress && <p>
+        Contract Address: {contractAddress}
+      </p>}
+      <AddProduct/>
+      {/* <AddScore/> */}
+      <ProductSearch/>
     </div>
+    // <div className="App">
+    //   <header className="App-header">
+    //     <img src={logo} className="App-logo" alt="logo" aria-busy={loading}/>        
+    //     <p>
+    //       <button type="button" className="App-button" disabled={loading} onClick={deployContract}>{deployState} Contract</button>
+    //     </p>
+    //     { contractAddress && <p>
+    //       Contract Address: {contractAddress}
+    //     </p>}
+    //     <p>
+    //       <input className="App-input" disabled={loading || !contractAddress} onChange={handleChange}/>
+    //       <button type="button" className="App-button" disabled={loading || !contractAddress || !desiredValue} onClick={setContractValue}>Set Value</button>
+    //     </p>
+    //     <p>
+    //       <button type="button" className="App-button" disabled={loading || !contractAddress} onClick={getContractValue}>{value}</button>
+    //     </p>
+    //     { errorMsg && <pre class="App-error">
+    //       Error: {errorMsg}
+    //     </pre>}
+    //   </header>
+    // </div>
   );
 }
 
