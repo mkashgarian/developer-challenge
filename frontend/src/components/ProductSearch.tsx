@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import Button from '@material-ui/core/Button';
+import { TextField } from '@material-ui/core';
 
-const ProductSearch = () => {
+const ProductSearch = (props: {contractAddress: string}) => {
 
     const [productId, setProductId] = useState('');
     const [productName, setProductName] = useState(null);
@@ -12,19 +14,23 @@ const ProductSearch = () => {
 
     return (
         <div className='product-search'>
-            Product ID: 
-            <input
+            <TextField
+                id="outlined-basic" 
+                label="Product ID" 
+                variant="outlined"
                 value={productId}
                 onChange={e => setProductId(e.target.value)}
             />
-            Production Date: 
-            <input
+            <TextField 
+                id="outlined-basic" 
+                label="Production Date" 
+                variant="outlined"
                 value={productionDate}
                 onChange={e => setProductionDate(e.target.value)}
             />
-            <button
+            <Button variant="contained" color="primary"
                 onClick={search}
-            >Search</button>
+            >Search</Button>
             {/* {productName &&  */}
                 <div>
                     Product Name is: {productName}
@@ -41,7 +47,7 @@ const ProductSearch = () => {
         // setLoading(true);
         setStatusMsg('');
         try {
-          const productRes = await fetch(`/api/0x8211f9f5a8e4c474ebf23aaff6d13e3194df5225/product/${productId}`);
+          const productRes = await fetch(`/api/${props.contractAddress}/product/${productId}`);
           const {manufacturer, name, error} = await productRes.json();
           if (!productRes.ok) {
             setStatusMsg(error);
@@ -60,7 +66,7 @@ const ProductSearch = () => {
       }
 
     async function getScore() {
-        const scoreRes = await fetch(`/api/0x8211f9f5a8e4c474ebf23aaff6d13e3194df5225/score/${productId}/${productionDate}`);
+        const scoreRes = await fetch(`/api/${props.contractAddress}/score/${productId}/${productionDate}`);
         const {score, error} = await scoreRes.json();
         if(!scoreRes.ok) {
             setStatusMsg(error);

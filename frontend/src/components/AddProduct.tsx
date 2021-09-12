@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const AddProduct = () => {
+const AddProduct = (props: {contractAddress: string}) => {
 
     const [productName, setProductName] = useState('');
     const [manufacturer, setManufacturer] = useState('');
@@ -30,7 +30,7 @@ const AddProduct = () => {
         // setLoading(true);
         setStatusMsg('');
         try {
-          const res = await fetch(`/api/0x8211f9f5a8e4c474ebf23aaff6d13e3194df5225/product`, {
+          const res = await fetch(`/api/${props.contractAddress}/product`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

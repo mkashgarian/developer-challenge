@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const AddScore = () => {
+const AddScore = (props: {contractAddress: string}) => {
 
     const [productId, setProductId] = useState('');
     const [statusMsg, setStatusMsg] = useState('');
@@ -54,7 +54,7 @@ const AddScore = () => {
         // setLoading(true);
         setStatusMsg('');
         try {
-          const res = await fetch(`/api/0x8211f9f5a8e4c474ebf23aaff6d13e3194df5225/score`, {
+          const res = await fetch(`/api/${props.contractAddress}/score`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
