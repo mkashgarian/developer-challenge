@@ -7,7 +7,7 @@ const AddProduct = () => {
     const [statusMsg, setStatusMsg] = useState('');
 
     return (
-        <div>
+        <div className='add-product'>
             Product Name: 
             <input
                 value={productName}
@@ -30,7 +30,7 @@ const AddProduct = () => {
         // setLoading(true);
         setStatusMsg('');
         try {
-          const res = await fetch(`/api/0x3bcbed1287b4e893d75e83ff7a26d90af21746ca/product`, {
+          const res = await fetch(`/api/0x8211f9f5a8e4c474ebf23aaff6d13e3194df5225/product`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -38,11 +38,12 @@ const AddProduct = () => {
               manufacturer: manufacturer
             })
           });
-          const {error} = await res.json();
+        //   const {productId, error} = await res.json();
+        console.log(await res.json());
           if (!res.ok) {
-            setStatusMsg(error)
+            // setStatusMsg(error)
           } else {
-            setStatusMsg("Success! New product has been added.");
+            setStatusMsg(`Success! New product has been added.`);
           }
         } catch(err: any) {
           setStatusMsg(err.stack)

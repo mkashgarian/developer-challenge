@@ -87,9 +87,15 @@ function App() {
       { contractAddress && <p>
         Contract Address: {contractAddress}
       </p>}
+      <p>
       <AddProduct/>
-      {/* <AddScore/> */}
+      </p>
+      <p>
+      <AddScore/>
+      </p>
+      <p>
       <ProductSearch/>
+      </p>
     </div>
     // <div className="App">
     //   <header className="App-header">

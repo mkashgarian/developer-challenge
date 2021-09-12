@@ -2,31 +2,81 @@ import React, { useState } from 'react';
 
 const AddScore = () => {
 
-    const [score, setScore] = useState('');
     const [productId, setProductId] = useState('');
+    const [statusMsg, setStatusMsg] = useState('');
+    const [herbicides, setHerbicides] = useState('');
+    const [pesticides, setPesticides] = useState('');
+    const [nonrenewableEnergy, setNonrenewableEnergy] = useState('');
+    const [plastics, setPlastics] = useState('');
+    const [productionDate, setProductionDate] = useState('');
 
 
     return (
-        <div>
+        <div className='add-score'>
             Product ID: 
             <input
                 value={productId}
                 onChange={e => setProductId(e.target.value)}
             />
-            Score: 
+            Production Date: 
             <input
-                value={score}
-                onChange={e => setScore(e.target.value)}
+                value={productionDate}
+                onChange={e => setProductionDate(e.target.value)}
+            />
+            Do you use pesticides? 
+            <input
+                value={pesticides}
+                onChange={e => setPesticides(e.target.value)}
+            />
+            Do you use plastic packaging? 
+            <input
+                value={plastics}
+                onChange={e => setPlastics(e.target.value)}
+            />
+            Do you use non-renewable energy? 
+            <input
+                value={nonrenewableEnergy}
+                onChange={e => setNonrenewableEnergy(e.target.value)}
+            />
+            Do you use herbicides? 
+            <input
+                value={herbicides}
+                onChange={e => setHerbicides(e.target.value)}
             />
             <button
                 onClick={submit}
             >Submit</button>
+            {statusMsg}
         </div>
     )
-}
 
-const submit = () => {
-    
+    async function submit() {
+        // setLoading(true);
+        setStatusMsg('');
+        try {
+          const res = await fetch(`/api/0x8211f9f5a8e4c474ebf23aaff6d13e3194df5225/score`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              productId: productId,
+              productionDate: productionDate,
+              plastics: plastics,
+              nonrenewableEnergy: nonrenewableEnergy,
+              herbicides: herbicides,
+              pesticides: pesticides
+            })
+          });
+          const {error} = await res.json();
+          if (!res.ok) {
+            setStatusMsg(error)
+          } else {
+            setStatusMsg(`Success! New score has been added for product ID ${productId} and date ${productionDate}.`);
+          }
+        } catch(err: any) {
+          setStatusMsg(err.stack)
+        }
+        // setLoading(false);
+      }
 }
 
 export default AddScore;

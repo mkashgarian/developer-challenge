@@ -39,10 +39,6 @@ app.post('/api/contract', async (req, res) => {
 });
 
 app.post('/api/:address/product', async (req, res) => {
-  console.log("Address is: " + req.params.address);
-  console.log("Name is: " + req.body.name);
-  console.log("Manufacturuer is: " + req.body.manufacturer);
-
   try {
     let postRes = await swaggerClient.apis.default.addProduct_post({
       address: req.params.address,
@@ -56,7 +52,6 @@ app.post('/api/:address/product', async (req, res) => {
     res.status(200).send(postRes.body)
   }
   catch(err) {
-    console.log("Marina error: " + JSON.stringify(err));
     res.status(500).send({error: `${err.response && JSON.stringify(err.response.body) && err.response.text}\n${err.stack}`});
   }
 });
@@ -75,6 +70,54 @@ app.get('/api/:address/product/:id', async (req, res) => {
     res.status(500).send({error: `${err.response && JSON.stringify(err.response.body) && err.response.text}\n${err.stack}`});
   }
 });
+
+app.post('/api/:address/score', async (req, res) => {
+  try {
+    let postRes = await swaggerClient.apis.default.addScore_post({
+      address: req.params.address,
+      body: {
+        _productId: req.body.productId,
+        _productionDate: req.body.productionDate,
+        _plastics: req.body.plastics,
+        _herbicides: req.body.herbicides,
+        _pesticides: req.body.pesticides,
+        _nonrenewableEnergy: req.body.nonrenewableEnergy
+      },
+      "kld-from": FROM_ADDRESS,
+      "kld-sync": "true"
+    });
+    res.status(200).send(postRes.body)
+  }
+  catch(err) {
+    res.status(500).send({error: `${err.response && JSON.stringify(err.response.body) && err.response.text}\n${err.stack}`});
+  }
+});
+
+app.get('/api/:address/score/:id/:date', async (req, res) => {
+  try {
+    console.log("id: " + req.params.id);
+    console.log("date: " + req.params.date);
+
+    let postRes = await swaggerClient.apis.default.getScoreTotal_get({
+      address: req.params.address,
+      _productId: req.params.id,
+      _productionDate: req.params.date,
+      "kld-from": FROM_ADDRESS,
+      "kld-sync": "true"
+    });
+    console.log(JSON.stringify(postRes, null, 1));
+    res.status(200).send(postRes.body)
+  }
+  catch(err) {
+    console.log(JSON.stringify(err, null, 1));
+    res.status(500).send({error: `${err.response && JSON.stringify(err.response.body) && err.response.text}\n${err.stack}`});
+  }
+});
+
+
+
+
+
 
 
 app.post('/api/contract/:address/value', async (req, res) => {
