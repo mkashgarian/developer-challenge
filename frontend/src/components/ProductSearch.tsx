@@ -4,6 +4,7 @@ import { TextField } from '@material-ui/core';
 
 const ProductSearch = (props: {contractAddress: string}) => {
 
+    const [upc, setUpc] = useState('');
     const [productId, setProductId] = useState('');
     const [productName, setProductName] = useState(null);
     const [manufacturer, setManufacturer] = useState(null);
@@ -16,10 +17,10 @@ const ProductSearch = (props: {contractAddress: string}) => {
         <div className='product-search'>
             <TextField
                 id="outlined-basic" 
-                label="Product ID" 
+                label="UPC" 
                 variant="outlined"
-                value={productId}
-                onChange={e => setProductId(e.target.value)}
+                value={upc}
+                onChange={e => setUpc(e.target.value)}
             />
             <TextField 
                 id="outlined-basic" 
@@ -31,14 +32,17 @@ const ProductSearch = (props: {contractAddress: string}) => {
             <Button variant="contained" color="primary"
                 onClick={search}
             >Search</Button>
-            {/* {productName &&  */}
+            {!statusMsg && 
                 <div>
-                    Product Name is: {productName}
+                    <div>
+                        Product Name is: {productName}
+                    </div>
+                    <div>
+                        Score is: {score}
+                    </div>
                 </div>
-                <div>
-                    Score is: {score}
-                </div>
-            {/* } */}
+             }
+             {statusMsg}
         </div>
     )
 
@@ -47,7 +51,7 @@ const ProductSearch = (props: {contractAddress: string}) => {
         // setLoading(true);
         setStatusMsg('');
         try {
-          const productRes = await fetch(`/api/${props.contractAddress}/product/${productId}`);
+          const productRes = await fetch(`/api/${props.contractAddress}/product/${upc}`);
           const {manufacturer, name, error} = await productRes.json();
           if (!productRes.ok) {
             setStatusMsg(error);
@@ -71,10 +75,11 @@ const ProductSearch = (props: {contractAddress: string}) => {
         if(!scoreRes.ok) {
             setStatusMsg(error);
         } else if (score) {
+            if(score == -1) {
+                setStatusMsg(`No scores have been added for this product with this production date.`);
+            }
             setScore(score);
-        } else {
-            setStatusMsg(`No scores have been added for this product with this production date.`);
-        }
+        } 
     }
 
 }

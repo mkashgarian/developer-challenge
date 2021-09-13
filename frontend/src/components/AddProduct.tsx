@@ -4,6 +4,7 @@ const AddProduct = (props: {contractAddress: string}) => {
 
     const [productName, setProductName] = useState('');
     const [manufacturer, setManufacturer] = useState('');
+    const [upc, setUpc] = useState('');
     const [statusMsg, setStatusMsg] = useState('');
 
     return (
@@ -17,6 +18,11 @@ const AddProduct = (props: {contractAddress: string}) => {
             <input
                 value={manufacturer}
                 onChange={e => setManufacturer(e.target.value)}
+            />
+            UPC: 
+            <input
+                value={upc}
+                onChange={e => setUpc(e.target.value)}
             />
             <button
                 onClick={submit}
@@ -35,7 +41,8 @@ const AddProduct = (props: {contractAddress: string}) => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               name: productName,
-              manufacturer: manufacturer
+              manufacturer: manufacturer,
+              upc: parseInt(upc)
             })
           });
         //   const {productId, error} = await res.json();

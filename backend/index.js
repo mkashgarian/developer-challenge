@@ -5,18 +5,30 @@ const archiver = require('archiver');
 const Swagger = require('swagger-client');
 const {URL} = require('url');
 const bodyparser = require('body-parser');
-
-const {
-  KALEIDO_REST_GATEWAY_URL,
-  KALEIDO_AUTH_USERNAME,
-  KALEIDO_AUTH_PASSWORD,
-  PORT,
-  FROM_ADDRESS,
-  CONTRACT_MAIN_SOURCE_FILE,
-  CONTRACT_CLASS_NAME
-} = require('./config');
+global.TextEncoder = require('util').TextEncoder;
+global.TextDecoder = require('util').TextDecoder;
+const { MongoClient } = require('mongodb');
 
 let swaggerClient; // Initialized in init()
+let fromAddress;
+let mongoClient;
+
+async function loadConfig() {
+  const { MONGO_URI } = require('./config');
+
+  mongoClient = new MongoClient(MONGO_URI);
+  await mongoClient.connect();
+
+  const db = mongoClient.db('ratings');
+  const collection = db.collection('config');
+
+  const config = {};
+  await collection.find({}).toArray().then((configs) => {
+    configs.map((c) => config[c.key] = c.value);
+  });
+
+  return config;
+}
 
 app.use(bodyparser.json());
 
@@ -27,7 +39,7 @@ app.post('/api/contract', async (req, res) => {
   try {
     let postRes = await swaggerClient.apis.default.constructor_post({
       body: {},
-      "kld-from": FROM_ADDRESS,
+      "kld-from": fromAddress,
       "kld-sync": "true"
     });
     res.status(200).send(postRes.body)
@@ -38,33 +50,34 @@ app.post('/api/contract', async (req, res) => {
   }
 });
 
+// add product
 app.post('/api/:address/product', async (req, res) => {
   try {
-    let postRes = await swaggerClient.apis.default.addProduct_post({
-      address: req.params.address,
-      body: {
-        _name: req.body.name,
-        _manufacturer: req.body.manufacturer
-      },
-      "kld-from": FROM_ADDRESS,
-      "kld-sync": "true"
-    });
-    res.status(200).send(postRes.body)
+    const db = mongoClient.db('ratings');
+    const collection = db.collection('product');
+
+    let response = await collection.insert({
+      name: req.body.name, 
+      manufacturer: req.body.manufacturer,
+      UPC: req.body.upc
+    })
+    console.log("Response: " + JSON.stringify(response, null, 1));
+    res.status(200).send(response.body)
   }
   catch(err) {
     res.status(500).send({error: `${err.response && JSON.stringify(err.response.body) && err.response.text}\n${err.stack}`});
   }
 });
 
-app.get('/api/:address/product/:id', async (req, res) => {
+// get product
+app.get('/api/:address/product/:upc', async (req, res) => {
   try {
-    let postRes = await swaggerClient.apis.default.getProduct_get({
-      address: req.params.address,
-      _productId: req.params.id,
-      "kld-from": FROM_ADDRESS,
-      "kld-sync": "true"
-    });
-    res.status(200).send(postRes.body)
+    const db = mongoClient.db('ratings');
+    const collection = db.collection('product');
+    console.log("upc is: " + req.params.upc);
+    let response = await collection.findOne({ UPC: parseInt(req.params.upc) });
+    console.log("Response getProduct: " + JSON.stringify(response, null, 1));
+    res.status(200).send(response)
   }
   catch(err) {
     res.status(500).send({error: `${err.response && JSON.stringify(err.response.body) && err.response.text}\n${err.stack}`});
@@ -83,7 +96,7 @@ app.post('/api/:address/score', async (req, res) => {
         _pesticides: req.body.pesticides,
         _nonrenewableEnergy: req.body.nonrenewableEnergy
       },
-      "kld-from": FROM_ADDRESS,
+      "kld-from": fromAddress,
       "kld-sync": "true"
     });
     res.status(200).send(postRes.body)
@@ -102,7 +115,7 @@ app.get('/api/:address/score/:id/:date', async (req, res) => {
       address: req.params.address,
       _productId: req.params.id,
       _productionDate: req.params.date,
-      "kld-from": FROM_ADDRESS,
+      "kld-from": fromAddress,
       "kld-sync": "true"
     });
     console.log(JSON.stringify(postRes, null, 1));
@@ -114,47 +127,17 @@ app.get('/api/:address/score/:id/:date', async (req, res) => {
   }
 });
 
-
-
-
-
-
-
-app.post('/api/contract/:address/value', async (req, res) => {
-  try {
-    let postRes = await swaggerClient.apis.default.set_post({
-      address: req.params.address,
-      body: {
-        x: req.body.x
-      },
-      "kld-from": FROM_ADDRESS,
-      "kld-sync": "true"
-    });
-    res.status(200).send(postRes.body)
-  }
-  catch(err) {
-    res.status(500).send({error: `${err.response && JSON.stringify(err.response.body) && err.response.text}\n${err.stack}`});
-  }
-});
-
-app.get('/api/contract/:address/value', async (req, res) => {
-  try {
-    let postRes = await swaggerClient.apis.default.get_get({
-      address: req.params.address,
-      body: {
-        x: req.body.x
-      },
-      "kld-from": FROM_ADDRESS,
-      "kld-sync": "true"
-    });
-    res.status(200).send(postRes.body)
-  }
-  catch(err) {
-    res.status(500).send({error: `${err.response && JSON.stringify(err.response.body) && err.response.text}\n${err.stack}`});
-  }
-});
-
 async function init() {
+  const {
+    KALEIDO_REST_GATEWAY_URL,
+    KALEIDO_AUTH_USERNAME,
+    KALEIDO_AUTH_PASSWORD,
+    PORT,
+    FROM_ADDRESS,
+    CONTRACT_MAIN_SOURCE_FILE,
+    CONTRACT_CLASS_NAME
+  } = await loadConfig();
+  fromAddress = FROM_ADDRESS;
 
   // Kaleido example for compilation of your Smart Contract and generating a REST API
   // --------------------------------------------------------------------------------
