@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import Alert from '@material-ui/lab/Alert';
 import { Box, Button, makeStyles, TextField, Typography } from '@material-ui/core';
 import ProductTable from './ProductTable';
@@ -29,12 +29,11 @@ const useStyles = makeStyles({
     marginTop: 20,
     margin: 'auto',
     width: '50%',
-    border: '3px solid green',
     padding: '10px'
   }
 })
 
-const AddProduct = (props: { getAllProducts: any; }) => {
+const AddProduct = (props: any) => {
 
     const classes = useStyles();
     const [productName, setProductName] = useState('');
@@ -96,7 +95,7 @@ const AddProduct = (props: { getAllProducts: any; }) => {
               
             </Box>
           </Box>
-          {(severity == "success" || severity == "error") &&
+          {(severity === "success" || severity === "error") &&
             <Alert severity={severity} className={classes.alert}>{statusMsg}</Alert>
           }
           <ProductTable
@@ -109,6 +108,11 @@ const AddProduct = (props: { getAllProducts: any; }) => {
     async function submit() {
         setStatusMsg('');
         try {
+          let upcExists = await props.checkIfUpcExists(upc);
+          if(upcExists.exists) {
+            setSeverity(`error`);
+            setStatusMsg('Uh oh! The UPC you entered already exists.');
+          } else {
           const res = await fetch(`/api/product`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -118,8 +122,6 @@ const AddProduct = (props: { getAllProducts: any; }) => {
               upc: parseInt(upc)
             })
           });
-        //   const {productId, error} = await res.json();
-        console.log(await res.json());
           if (!res.ok) {
             setSeverity(`error`);
             setStatusMsg(`Uh oh! This product was not able to be added.`);
@@ -127,6 +129,7 @@ const AddProduct = (props: { getAllProducts: any; }) => {
             setSeverity(`success`);
             setStatusMsg(`Success! New product has been added.`);
           }
+        }
         } catch(err: any) {
           setStatusMsg(`Uh oh! This product was not able to be added.`);
           // setStatusMsg(err.stack)

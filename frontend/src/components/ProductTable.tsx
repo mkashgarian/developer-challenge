@@ -7,27 +7,30 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
+import { Typography } from '@material-ui/core';
 
 const useStyles = makeStyles({
   table: {
     minWidth: 650,
   },
+  header: {
+    width: '50%',
+    margin: '0 auto'
+  }
 });
 
 export default function ProductTable(props: any) {
   const classes = useStyles();
-
-  let [itemList, itemsSet] = useState<any[]>([]);
+  let [itemList, setItemList] = useState<any[]>([]);
 
   useEffect(() => {
-    async function fetchMyApi() {
+    async function fetch() {
       let response = await props.getAllItems();
-      itemsSet(response.product);
+      setItemList(response.product);
     }
-    fetchMyApi();
-  }, []);
+    fetch();
 
-
+  }, [props]);
 
   return (
     <TableContainer component={Paper}>
@@ -40,7 +43,7 @@ export default function ProductTable(props: any) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {itemList.map((item: any) => (
+          {itemList?.map((item: any) => (
             <TableRow key={item.UPC}>
               <TableCell component="th" scope="row">
                 {item.UPC}

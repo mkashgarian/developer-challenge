@@ -2,9 +2,6 @@ import React, { useState } from 'react';
 import Button from '@material-ui/core/Button';
 import { Box, Card, CardContent, makeStyles, TextField, Typography } from '@material-ui/core';
 import Alert from '@material-ui/lab/Alert';
-import 'date-fns';
-import DateFnsUtils from '@date-io/date-fns';
-import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
 import { ScoreChart } from '../charts/ScoreChart';
 
 const useStyles = makeStyles({
@@ -144,10 +141,10 @@ const ProductSearch = (props: { getProduct: any}) => {
                 </Box>
             </Box>
                 <div>
-                    {(severity == "success" || severity == "error" || severity == "warning") &&
+                    {(severity === "success" || severity === "error" || severity === "warning") &&
                         <Alert severity={severity}>{statusMsg}</Alert>
                     }
-                    { severity == "success" &&
+                    { severity === "success" &&
                         <Card className={classes.root} raised variant="outlined">
                             <CardContent>
                                 <Typography variant="h4">
@@ -171,9 +168,6 @@ const ProductSearch = (props: { getProduct: any}) => {
         </div>
     )
 
-
-
-
     async function getScore() {
         const scoreRes = await fetch(`/api/score/${upc}/${productionDate}`);
         const {score, error} = await scoreRes.json();
@@ -181,7 +175,7 @@ const ProductSearch = (props: { getProduct: any}) => {
             setSeverity(`error`);
             setStatusMsg(error);
         } else if (score) {
-            if(score == -1) {
+            if(score === -1) {
                 setSeverity(`warning`);
                 setStatusMsg(`No scores have been added for this product with this production date.`);
             } else {
@@ -195,7 +189,6 @@ const ProductSearch = (props: { getProduct: any}) => {
     async function getScoreHistory() {
         const scoreRes = await fetch(`/api/score/${upc}`);
         const res = await scoreRes.json();
-        console.log("body is " + JSON.stringify(res, null, 1));
         setChartData(res);
     }
 

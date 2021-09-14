@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import './App.css';
 import SupplyChain from './SupplyChain.tsx';
-import CssBaseline from '@material-ui/core/CssBaseline';
 import { createTheme, ThemeProvider } from '@material-ui/core';
-
 
 const theme = createTheme({
   palette: {
@@ -19,9 +17,6 @@ function App() {
   const [deployState, setDeployState] = useState("Deploy");
   const [contractAddress, setContractAddress] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
-
-
-
 
   async function deployContract() {
     setLoading(true);
@@ -51,19 +46,14 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
-
-    {/* // <React.Fragment> */}
-      
       <button type="button" className="App-button" disabled={loading} onClick={deployContract}>{deployState} Contract</button>
       { contractAddress && <p>
         Contract Address: {contractAddress}
       </p>}
-            {/* <CssBaseline /> */}
 
       <SupplyChain
         contractAddress={contractAddress}
         />
-    {/* </React.Fragment> */}
     </ThemeProvider>
   );
 }

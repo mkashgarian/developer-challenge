@@ -5,7 +5,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
 import FormLabel from '@material-ui/core/FormLabel';
 import Button from '@material-ui/core/Button';
-import { Box, makeStyles, TextField } from '@material-ui/core';
+import { Box, makeStyles, TextField, Typography } from '@material-ui/core';
 import Alert from '@material-ui/lab/Alert';
 
 const useStyles = makeStyles({
@@ -27,12 +27,14 @@ const useStyles = makeStyles({
     marginTop: 20,
     margin: 'auto',
     width: '50%',
-    border: '3px solid green',
+    padding: '10px'
+  },
+  spinner: {
     padding: '10px'
   }
-})
+});
 
-const AddScore = () => {
+const AddScore = (props: any) => {
 
     const classes = useStyles();
     const [statusMsg, setStatusMsg] = useState('');
@@ -43,13 +45,25 @@ const AddScore = () => {
     const [plastics, setPlastics] = useState('');
     const [productionDate, setProductionDate] = useState('');
     const [upc, setUpc] = useState('');
+    const [loading, setLoading] = useState(false);
 
     return (
         <div className='add-score'>
+          <Typography 
+            paragraph
+            color="textSecondary"
+            className={classes.intro}
+          >
+            Do you need to add a score for a piece of the supply chain you are currently working on? Use this form and 
+            enter the UPC and the manufacturing start date to start the process. Next, answer the simple questions below
+            regarding what kind of work went into this product for your part of the manufacturing process. Please answer
+            all questions.
+          </Typography>
           <Box className={classes.container}>
             <Box className={classes.box}>
               <TextField
                 id="outlined-basic" 
+                placeholder="284756193816"
                 label="UPC" 
                 variant="outlined"
                 value={upc}
@@ -60,7 +74,6 @@ const AddScore = () => {
               <TextField 
                 type="date"
                 id="outlined-basic" 
-                // label="Production Date" 
                 variant="outlined"
                 value={productionDate}
                 onChange={e => setProductionDate(e.target.value)}
@@ -90,48 +103,55 @@ const AddScore = () => {
                     <FormControlLabel value="false" control={<Radio />} label="No" />
                 </RadioGroup>
             </FormControl>
-</Box>
+        </Box>
             <Button 
                 variant="contained" 
                 color="primary"
                 onClick={submit}
+                disabled={loading}
             >
                 Submit
             </Button>
-            {(severity == "success" || severity == "error") &&
+            {((severity === "success" || severity === "error") && statusMsg) &&
               <Alert className={classes.alert} severity={severity}>{statusMsg}</Alert>
             }
         </div>
     )
 
     async function submit() {
-        // setLoading(true);
+        setLoading(true);
         setStatusMsg('');
+        
         try {
-          const res = await fetch(`/api/score`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              upc: parseInt(upc),
-              productionDate: productionDate,
-              plastics: plastics,
-              nonrenewableEnergy: nonrenewableEnergy,
-              herbicides: herbicides,
-              pesticides: pesticides
-            })
-          });
-          const {error} = await res.json();
-          if (!res.ok) {
+          let upcExists = await props.checkIfUpcExists(upc);
+          if(!upcExists.exists) {
             setSeverity(`error`);
-            setStatusMsg('Uh oh! Your score was not added.')
+            setStatusMsg('Uh oh! The UPC you entered does not exist.');
           } else {
-            setSeverity(`success`);
-            setStatusMsg(`Success! New score has been added for UPC ${upc} and date ${productionDate}.`);
+            const res = await fetch(`/api/score`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                upc: parseInt(upc),
+                productionDate: productionDate,
+                plastics: plastics,
+                nonrenewableEnergy: nonrenewableEnergy,
+                herbicides: herbicides,
+                pesticides: pesticides
+              })
+            });
+            if (!res.ok) {
+              setSeverity(`error`);
+              setStatusMsg('Uh oh! Your score was not added.')
+            } else {
+              setSeverity(`success`);
+              setStatusMsg(`Success! New score has been added for UPC ${upc} and date ${productionDate}.`);
+            }
           }
         } catch(err: any) {
           setStatusMsg(err.stack)
         }
-        // setLoading(false);
+        setLoading(false);
       }
 }
 
