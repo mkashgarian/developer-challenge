@@ -32,6 +32,7 @@ const SupplyChain = (props: {contractAddress: string}) => {
             </AppBar>
             <TabPanel value={value} index={0}>
                 <AddProduct
+                  getAllProducts={getAllProducts}
                 />
             </TabPanel>
             <TabPanel value={value} index={1}>
@@ -57,6 +58,21 @@ const SupplyChain = (props: {contractAddress: string}) => {
           return { status: 'success', product: product};
         } 
         return { status: 'Sorry, there was an error searching.', product: null};
+      } catch(err: any) {
+        console.log(err);
+        return { status: 'Sorry, there was an error searching.', product: null};
+      }
+    }
+
+    async function getAllProducts() {
+      try {
+        const productRes = await fetch(`/api/product`);
+        if(productRes.status == 200) {
+          const products = await productRes.json();
+          console.log("products is: " + JSON.stringify(products));
+          // const product: Product = {name: res.name, manufacturer: res.manufacturer};
+          return { status: 'success', product: products };
+        } 
       } catch(err: any) {
         console.log(err);
         return { status: 'Sorry, there was an error searching.', product: null};

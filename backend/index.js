@@ -8,6 +8,15 @@ const bodyparser = require('body-parser');
 global.TextEncoder = require('util').TextEncoder;
 global.TextDecoder = require('util').TextDecoder;
 const { MongoClient } = require('mongodb');
+const { post } = require('request');
+const _ = require('lodash');
+
+const SCORE_ASSIGNMENTS = {
+  "herbicides": 15,
+  "pesticides": 20,
+  "plastics": 30,
+  "nonrenewableEnergy": 35
+};
 
 let swaggerClient; // Initialized in init()
 let fromAddress;
@@ -32,7 +41,7 @@ async function loadConfig() {
 
 app.use(bodyparser.json());
 
-/*
+
 app.post('/api/contract', async (req, res) => {
   // Note: we really only want to deploy a new instance of the contract
   //       when we are initializing our on-chain state for the first time.
@@ -50,7 +59,7 @@ app.post('/api/contract', async (req, res) => {
     res.status(500).send({error: `${err.response && JSON.stringify(err.response.body)}\n${err.stack}`});
   }
 });
-*/
+
 
 // add product
 app.post('/api/product', async (req, res) => {
@@ -84,6 +93,20 @@ app.get('/api/product/:upc', async (req, res) => {
     } else {
       res.status(200).send(response);
     }
+  }
+  catch(err) {
+    res.status(500).send({error: `${err.response && JSON.stringify(err.response.body) && err.response.text}\n${err.stack}`});
+  }
+});
+
+// get all products
+app.get('/api/product', async (req, res) => {
+  try {
+    const db = mongoClient.db('ratings');
+    const collection = db.collection('product');
+    let response = await collection.find({}).toArray();
+    console.log("Response get all products: " + JSON.stringify(response, null, 1));
+    res.status(200).send(response);
   }
   catch(err) {
     res.status(500).send({error: `${err.response && JSON.stringify(err.response.body) && err.response.text}\n${err.stack}`});
@@ -144,21 +167,45 @@ app.get('/api/score/:upc', async (req, res) => {
     const db = mongoClient.db('ratings');
     const collection = db.collection('config');
     const contractAddress = await collection.findOne({ key: "CONTRACT_ADDRESS" });
-    const epochTime = new Date(req.params.date).getTime()/1000;
     let postRes = await swaggerClient.apis.default.getScoreHistory_get({
       address: contractAddress.value,
       _upc: parseInt(req.params.upc),
       "kld-from": fromAddress,
       "kld-sync": "true"
     });
-    console.log(JSON.stringify(postRes, null, 1));
-    res.status(200).send(postRes.body)
+    let chartPoints = [];
+    // group score entries by date
+    let scoreByDate = _.groupBy(postRes.body.output, function(scoreEntry) {
+      return scoreEntry.productionDate;
+    })
+    Object.keys(scoreByDate).map((scoreDate) => {
+      let score = calculateScore(scoreByDate[scoreDate]);
+      let date = new Date(0);
+      date.setUTCSeconds(scoreDate);
+      const year = date.getUTCFullYear();
+      const month = date.getUTCMonth();
+      const day = date.getUTCDay();
+      chartPoints.push([scoreDate*1000, score]);
+    })
+    res.status(200).send(chartPoints);
   }
   catch(err) {
     console.log(JSON.stringify(err, null, 1));
     res.status(500).send({error: `${err.response && JSON.stringify(err.response.body) && err.response.text}\n${err.stack}`});
   }
 });
+
+function calculateScore(dateRecords) {
+  let score = 0;
+  dateRecords.map((dateRecord) => {
+    Object.keys(dateRecord.envImpact).map((impact) => {
+      if(impact in SCORE_ASSIGNMENTS) {
+        score += !dateRecord.envImpact[impact] ? SCORE_ASSIGNMENTS[impact] : 0;
+      }
+    });
+  })
+  return Math.floor(score/dateRecords.length);
+}
 
 async function init() {
   const {

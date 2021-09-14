@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Alert from '@material-ui/lab/Alert';
 import { Box, Button, makeStyles, TextField, Typography } from '@material-ui/core';
+import ProductTable from './ProductTable';
 
 
 const useStyles = makeStyles({
@@ -33,7 +34,7 @@ const useStyles = makeStyles({
   }
 })
 
-const AddProduct = () => {
+const AddProduct = (props: { getAllProducts: any; }) => {
 
     const classes = useStyles();
     const [productName, setProductName] = useState('');
@@ -98,6 +99,9 @@ const AddProduct = () => {
           {(severity == "success" || severity == "error") &&
             <Alert severity={severity} className={classes.alert}>{statusMsg}</Alert>
           }
+          <ProductTable
+            getAllItems={props.getAllProducts}
+          />
           </div>
     )
 

@@ -22,7 +22,7 @@ function App() {
 
 
 
-/*
+
   async function deployContract() {
     setLoading(true);
     setErrorMsg(null);
@@ -47,17 +47,17 @@ function App() {
     }
     setLoading(false);
   }
-  */
+  
 
   return (
     <ThemeProvider theme={theme}>
 
     {/* // <React.Fragment> */}
       
-      {/* <button type="button" className="App-button" disabled={loading} onClick={deployContract}>{deployState} Contract</button>
+      <button type="button" className="App-button" disabled={loading} onClick={deployContract}>{deployState} Contract</button>
       { contractAddress && <p>
         Contract Address: {contractAddress}
-      </p>} */}
+      </p>}
             {/* <CssBaseline /> */}
 
       <SupplyChain

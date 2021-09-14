@@ -5,7 +5,7 @@ import Alert from '@material-ui/lab/Alert';
 import 'date-fns';
 import DateFnsUtils from '@date-io/date-fns';
 import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
-
+import { ScoreChart } from '../charts/ScoreChart';
 
 const useStyles = makeStyles({
     field: {
@@ -38,7 +38,7 @@ const useStyles = makeStyles({
     root: {
         marginTop: 20,
         margin: 'auto',
-        width: '50%',
+        width: '60%',
         padding: '10px',
         border: '3px solid #2874a6',
         backgroundColor: '#d6eaf8'
@@ -60,34 +60,42 @@ const ProductSearch = (props: { getProduct: any}) => {
     const [score, setScore] = useState('');
     const [productionDate, setProductionDate] = useState('01/01/2000');
     const [severity, setSeverity] = useState('');
-    const [upcError, setUpcError] = useState(false);
-    const [dateError, setDateError] = useState(false);
+    const [chartData, setChartData] = useState([]);
 
-
-    const handleDateChange = (date: Date | null) => {
-        if(date) {
-            setProductionDate(JSON.stringify(date));
+    const options: Highcharts.Options = {
+        title: {
+            text: 'Average Score Over Time'
+        },
+        series: [{
+            name: 'Average Product Score',
+            type: 'line',
+            data: chartData
+        }],
+        xAxis: {
+            type: 'datetime',
+            title: {
+                text: 'Date'
+            }
+        },
+        yAxis: {
+            title: {
+                text: 'Average Product Score'
+            }
         }
-      };
+    }
 
-    async function search(e: any) {
-        console.log("upc is " + upc);
-        e.preventDefault();
-        setDateError(false);
-        setUpcError(false);
-        if(upc == '') {
-            setUpcError(true);
-        }
+    async function search() {
         if(upc && productionDate) {
-
             const {status, product} = await props.getProduct(upc);
             if(product) {
                 setProductName(product.name);
                 setManufacturer(product.manufacturer);
                 getScore();
+                getScoreHistory();
             } else {
                 setSeverity(`error`);
                 setStatusMsg(status);
+                setChartData([]);
             }
         } 
     }
@@ -150,11 +158,15 @@ const ProductSearch = (props: { getProduct: any}) => {
                                     <br/>
                                 </Typography>
                                 <Typography variant="body1">
-                                    Score: {score}
+                                    The score for your product made on {productionDate} is <b>{score}</b>.
                                 </Typography>
                             </CardContent>
                         </Card>
                     }
+                    { chartData.length > 1 &&
+                        <ScoreChart options={options} />
+                    }
+                        
                 </div>
         </div>
     )
@@ -174,10 +186,17 @@ const ProductSearch = (props: { getProduct: any}) => {
                 setStatusMsg(`No scores have been added for this product with this production date.`);
             } else {
                 setScore(score);
-                setStatusMsg('Success! We found your product along with its current scores.')
+                setStatusMsg('Success! We found your product along with its current scores.');
                 setSeverity(`success`);
             }
         } 
+    }
+
+    async function getScoreHistory() {
+        const scoreRes = await fetch(`/api/score/${upc}`);
+        const res = await scoreRes.json();
+        console.log("body is " + JSON.stringify(res, null, 1));
+        setChartData(res);
     }
 
 }
