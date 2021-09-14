@@ -29,42 +29,41 @@ contract Ratings {
   }
 
   mapping(uint => Score) private scores;
+  mapping(uint => uint) private productScoreCounts;
 
   function addScore(uint _upc, uint _productionDate, bool _plastics, 
       bool _herbicides, bool _pesticides, bool _nonrenewableEnergy) public returns (uint scoreId) {
     EnvImpact memory envImpact = EnvImpact(_plastics, _pesticides, _herbicides, _nonrenewableEnergy);
     scores[scoreCount] = Score(envImpact, _upc, _productionDate);
+    productScoreCounts[_upc] +=1;
     return scoreCount++;
   }
 
-  function getScoreTotal(uint _upc, uint _productionDate) public view returns (int score) {
-    int scoreTotal = 0;
-    int productScoreCount = 0;
-    for(uint i = 0; i < scoreCount; i++) {
-      // for each product id and date match, use score entry to calculate total score
-      if(scores[i].upc == _upc && scores[i].productionDate == _productionDate) {
-        scoreTotal += !scores[i].envImpact.pesticides ? 10 : 0;
-        scoreTotal += !scores[i].envImpact.nonrenewableEnergy ? 10 : 0;
-        scoreTotal += !scores[i].envImpact.plastics ? 10 : 0;
-        scoreTotal += !scores[i].envImpact.herbicides ? 10 : 0;
-        productScoreCount++;
-      }
+  // this will get score total for a product made on a specific date & the processes it went through
+  function getScoreTotal(uint _upc, uint _productionDate) public view returns (Score[] memory) {
+    Score[] memory scoresForProductAndDate = new Score[](getScoreCountPerProductAndDate(_upc, _productionDate));
+    uint count = 0;
+    for(uint i=0; i < scoreCount; i++) {
+        if(scores[i].upc == _upc && scores[i].productionDate == _productionDate) {
+            scoresForProductAndDate[count++] = scores[i];
+        }
     }
-    return productScoreCount == 0 ? -1 : scoreTotal/productScoreCount;
+    return scoresForProductAndDate;
   }
   
-  function getScoreCountPerProduct(uint _upc) private view returns (uint total) {
-      uint total = 0;
+  function getScoreCountPerProductAndDate(uint _upc, uint _productionDate) private view returns (uint total) {
       for(uint i=0; i < scoreCount; i++) {
-        if(scores[i].upc == _upc) {
+        if(scores[i].upc == _upc && scores[i].productionDate == _productionDate) {
             total++;
         }
     }
     return total;
   }
 
+  // this will get a history of ALL products with this UPC no matter the date, and 
+  // the actual scores will be calculated and averaged by day on the backend
   function getScoreHistory(uint _upc) public view returns (Score[] memory) {
-    Score[] memory scoresForProduct = new Score[](getScoreCountPerProduct(_upc));
+    Score[] memory scoresForProduct = new Score[](productScoreCounts[_upc]);
     uint count = 0;
     for(uint i=0; i < scoreCount; i++) {
         if(scores[i].upc == _upc) {

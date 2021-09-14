@@ -135,7 +135,6 @@ const AddProduct = (props: any) => {
           // setStatusMsg(err.stack)
         }
       }
-
-
 }
+
 export default AddProduct;

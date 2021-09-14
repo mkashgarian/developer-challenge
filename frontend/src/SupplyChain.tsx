@@ -89,9 +89,7 @@ const SupplyChain = (props: {contractAddress: string}) => {
         return { status: 'Sorry, there was an error.'};
       }
     }
-
 }
-
 
 function TabPanel(props: any) {
     const { children, value, index, ...other } = props;  return (

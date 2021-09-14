@@ -104,17 +104,17 @@ const AddScore = (props: any) => {
                 </RadioGroup>
             </FormControl>
         </Box>
-            <Button 
-                variant="contained" 
-                color="primary"
-                onClick={submit}
-                disabled={loading}
-            >
-                Submit
-            </Button>
-            {((severity === "success" || severity === "error") && statusMsg) &&
-              <Alert className={classes.alert} severity={severity}>{statusMsg}</Alert>
-            }
+          <Button 
+            variant="contained" 
+            color="primary"
+            onClick={submit}
+            disabled={loading}
+          >
+            Submit
+          </Button>
+          {((severity === "success" || severity === "error") && statusMsg) &&
+            <Alert className={classes.alert} severity={severity}>{statusMsg}</Alert>
+          }
         </div>
     )
 

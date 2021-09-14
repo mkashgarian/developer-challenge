@@ -143,6 +143,7 @@ app.get('/api/score/:upc/:date', async (req, res) => {
     const collection = db.collection('config');
     const contractAddress = await collection.findOne({ key: "CONTRACT_ADDRESS" });
     const epochTime = new Date(req.params.date).getTime()/1000;
+
     let postRes = await swaggerClient.apis.default.getScoreTotal_get({
       address: contractAddress.value,
       _upc: parseInt(req.params.upc),
@@ -150,7 +151,12 @@ app.get('/api/score/:upc/:date', async (req, res) => {
       "kld-from": fromAddress,
       "kld-sync": "true"
     });
-    res.status(200).send(postRes.body)
+    if(postRes.body.output.length === 0) {
+      res.status(200).send({score: -1});
+    } else {
+      let score = calculateScore(postRes.body.output);
+      res.status(200).send({score: score})
+    }
   }
   catch(err) {
     res.status(500).send({error: `${err.response && JSON.stringify(err.response.body) && err.response.text}\n${err.stack}`});
@@ -176,6 +182,7 @@ app.get('/api/score/:upc', async (req, res) => {
     })
     Object.keys(scoreByDate).map((scoreDate) => {
       let score = calculateScore(scoreByDate[scoreDate]);
+      // convert date to work with chart
       let date = new Date(0);
       date.setUTCSeconds(scoreDate);
       const year = date.getUTCFullYear();
@@ -186,11 +193,11 @@ app.get('/api/score/:upc', async (req, res) => {
     res.status(200).send(chartPoints);
   }
   catch(err) {
-    console.log(JSON.stringify(err, null, 1));
     res.status(500).send({error: `${err.response && JSON.stringify(err.response.body) && err.response.text}\n${err.stack}`});
   }
 });
 
+// using the yes/no answers from the supply chain pieces, calculate sustainability scores
 function calculateScore(dateRecords) {
   let score = 0;
   dateRecords.map((dateRecord) => {

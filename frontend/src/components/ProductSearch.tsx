@@ -99,7 +99,6 @@ const ProductSearch = (props: { getProduct: any}) => {
 
     return (
         <div className='product-search'>
-
             <Typography 
                 paragraph
                 color="textSecondary"
@@ -155,7 +154,7 @@ const ProductSearch = (props: { getProduct: any}) => {
                                     <br/>
                                 </Typography>
                                 <Typography variant="body1">
-                                    The score for your product made on {productionDate} is <b>{score}</b>.
+                                    The score for your exact product and manufacturing date is <b>{score}</b>.
                                 </Typography>
                             </CardContent>
                         </Card>
@@ -170,19 +169,18 @@ const ProductSearch = (props: { getProduct: any}) => {
 
     async function getScore() {
         const scoreRes = await fetch(`/api/score/${upc}/${productionDate}`);
-        const {score, error} = await scoreRes.json();
+        const {error, score} = await scoreRes.json();
         if(!scoreRes.ok) {
             setSeverity(`error`);
             setStatusMsg(error);
-        } else if (score) {
-            if(score === -1) {
-                setSeverity(`warning`);
-                setStatusMsg(`No scores have been added for this product with this production date.`);
-            } else {
+        } else if(score === -1) {
+            setSeverity(`warning`);
+            setStatusMsg(`No scores have been added for this product with this production date.`);
+        } else {
                 setScore(score);
                 setStatusMsg('Success! We found your product along with its current scores.');
                 setSeverity(`success`);
-            }
+            
         } 
     }
 
@@ -191,7 +189,6 @@ const ProductSearch = (props: { getProduct: any}) => {
         const res = await scoreRes.json();
         setChartData(res);
     }
-
 }
 
 export default ProductSearch;
