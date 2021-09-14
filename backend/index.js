@@ -32,6 +32,7 @@ async function loadConfig() {
 
 app.use(bodyparser.json());
 
+/*
 app.post('/api/contract', async (req, res) => {
   // Note: we really only want to deploy a new instance of the contract
   //       when we are initializing our on-chain state for the first time.
@@ -49,34 +50,20 @@ app.post('/api/contract', async (req, res) => {
     res.status(500).send({error: `${err.response && JSON.stringify(err.response.body)}\n${err.stack}`});
   }
 });
+*/
 
 // add product
-app.post('/api/:address/product', async (req, res) => {
+app.post('/api/product', async (req, res) => {
   try {
     const db = mongoClient.db('ratings');
     const collection = db.collection('product');
 
-    let response = await collection.insert({
+    let response = await collection.insertOne({
       name: req.body.name, 
       manufacturer: req.body.manufacturer,
       UPC: req.body.upc
     })
     console.log("Response: " + JSON.stringify(response, null, 1));
-    res.status(200).send(response.body)
-  }
-  catch(err) {
-    res.status(500).send({error: `${err.response && JSON.stringify(err.response.body) && err.response.text}\n${err.stack}`});
-  }
-});
-
-// get product
-app.get('/api/:address/product/:upc', async (req, res) => {
-  try {
-    const db = mongoClient.db('ratings');
-    const collection = db.collection('product');
-    console.log("upc is: " + req.params.upc);
-    let response = await collection.findOne({ UPC: parseInt(req.params.upc) });
-    console.log("Response getProduct: " + JSON.stringify(response, null, 1));
     res.status(200).send(response)
   }
   catch(err) {
@@ -84,13 +71,37 @@ app.get('/api/:address/product/:upc', async (req, res) => {
   }
 });
 
-app.post('/api/:address/score', async (req, res) => {
+// get product
+app.get('/api/product/:upc', async (req, res) => {
   try {
+    const db = mongoClient.db('ratings');
+    const collection = db.collection('product');
+    console.log("upc is: " + req.params.upc);
+    let response = await collection.findOne({ UPC: parseInt(req.params.upc) });
+    console.log("Response getProduct: " + JSON.stringify(response, null, 1));
+    if(response == null) {
+      res.status(404).send('product not found');
+    } else {
+      res.status(200).send(response);
+    }
+  }
+  catch(err) {
+    res.status(500).send({error: `${err.response && JSON.stringify(err.response.body) && err.response.text}\n${err.stack}`});
+  }
+});
+
+// add score
+app.post('/api/score', async (req, res) => {
+  try {
+    const db = mongoClient.db('ratings');
+    const collection = db.collection('config');
+    const contractAddress = await collection.findOne({ key: "CONTRACT_ADDRESS" });
+    const epochTime = new Date(req.body.productionDate).getTime()/1000;
     let postRes = await swaggerClient.apis.default.addScore_post({
-      address: req.params.address,
+      address: contractAddress.value,
       body: {
-        _productId: req.body.productId,
-        _productionDate: req.body.productionDate,
+        _upc: req.body.upc,
+        _productionDate: epochTime,
         _plastics: req.body.plastics,
         _herbicides: req.body.herbicides,
         _pesticides: req.body.pesticides,
@@ -106,15 +117,37 @@ app.post('/api/:address/score', async (req, res) => {
   }
 });
 
-app.get('/api/:address/score/:id/:date', async (req, res) => {
+// get score total
+app.get('/api/score/:upc/:date', async (req, res) => {
   try {
-    console.log("id: " + req.params.id);
-    console.log("date: " + req.params.date);
-
+    const db = mongoClient.db('ratings');
+    const collection = db.collection('config');
+    const contractAddress = await collection.findOne({ key: "CONTRACT_ADDRESS" });
+    const epochTime = new Date(req.params.date).getTime()/1000;
     let postRes = await swaggerClient.apis.default.getScoreTotal_get({
-      address: req.params.address,
-      _productId: req.params.id,
-      _productionDate: req.params.date,
+      address: contractAddress.value,
+      _upc: parseInt(req.params.upc),
+      _productionDate: epochTime,
+      "kld-from": fromAddress,
+      "kld-sync": "true"
+    });
+    res.status(200).send(postRes.body)
+  }
+  catch(err) {
+    res.status(500).send({error: `${err.response && JSON.stringify(err.response.body) && err.response.text}\n${err.stack}`});
+  }
+});
+
+// get all scores (with dates) for a product - plus product name and manufacturer
+app.get('/api/score/:upc', async (req, res) => {
+  try {
+    const db = mongoClient.db('ratings');
+    const collection = db.collection('config');
+    const contractAddress = await collection.findOne({ key: "CONTRACT_ADDRESS" });
+    const epochTime = new Date(req.params.date).getTime()/1000;
+    let postRes = await swaggerClient.apis.default.getScoreHistory_get({
+      address: contractAddress.value,
+      _upc: parseInt(req.params.upc),
       "kld-from": fromAddress,
       "kld-sync": "true"
     });

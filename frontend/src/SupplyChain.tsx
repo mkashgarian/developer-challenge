@@ -9,19 +9,22 @@ import AddProduct from './components/AddProduct';
 import AddScore from './components/AddScore';
 import ProductSearch from './components/ProductSearch';
 
-const SupplyChain = (props: {contractAddress: string}) => {
+interface Product  {
+  name: string,
+  manufacturer: string
+}
 
+const SupplyChain = (props: {contractAddress: string}) => {
 
     const [value, setValue] = React.useState(0);  
     const handleChange = (event: any, newValue: any) => {
         setValue(newValue);
       };
 
-
     return (
         <div className='supply-chain'>
             <AppBar position="static">
-                <Tabs value={value} onChange={handleChange} aria-label="simple tabs example">
+                <Tabs value={value} onChange={handleChange} centered aria-label="simple tabs example">
                 <Tab label="Add a Product" />
                 <Tab label="Add a Score" />
                 <Tab label="Search for a Product" />
@@ -29,23 +32,38 @@ const SupplyChain = (props: {contractAddress: string}) => {
             </AppBar>
             <TabPanel value={value} index={0}>
                 <AddProduct
-                contractAddress={props.contractAddress}
                 />
             </TabPanel>
             <TabPanel value={value} index={1}>
                 <AddScore
-                contractAddress={props.contractAddress}
                 />
             </TabPanel>
             <TabPanel value={value} index={2}>
                 <ProductSearch
-                contractAddress={props.contractAddress}
+                  getProduct={getProduct}
                 />
             </TabPanel>
         </div>
     )
 
+    async function getProduct(upc: number) {
+      try {
+        const productRes = await fetch(`/api/product/${upc}`);
+        if(productRes.status == 404) {
+          return { status: 'Sorry, the UPC you entered does not exist.', product: null};
+        } else if(productRes.status == 200) {
+          const res = await productRes.json();
+          const product: Product = {name: res.name, manufacturer: res.manufacturer};
+          return { status: 'success', product: product};
+        } 
+        return { status: 'Sorry, there was an error searching.', product: null};
+      } catch(err: any) {
+        console.log(err);
+        return { status: 'Sorry, there was an error searching.', product: null};
+      }
+    }
 }
+
 
 function TabPanel(props: any) {
     const { children, value, index, ...other } = props;  return (

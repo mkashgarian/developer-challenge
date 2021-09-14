@@ -1,4 +1,6 @@
 pragma solidity >=0.4.24 <0.6.0;
+pragma experimental ABIEncoderV2;
+// pragma abicoderv2;
 /**
   * @title Simple Storage
   * @dev Read and write values to the chain
@@ -10,13 +12,7 @@ contract Ratings {
   uint scoreCount;
 
   constructor() public {
-    productCount = 0;
     scoreCount = 0;
-  }
-
-  struct Product {
-    string name;
-    string manufacturer;
   }
 
   struct Score {
@@ -34,23 +30,12 @@ contract Ratings {
 
   mapping(uint => Score) private scores;
 
-  mapping(uint => Product) private products;
-
-  // function addProduct(string memory _name, string memory _manufacturer) public returns (uint productId) {
-  //   products[productCount] = Product(_name, _manufacturer);
-  //   return productCount++;
-  // }
-
   function addScore(uint _upc, uint _productionDate, bool _plastics, 
       bool _herbicides, bool _pesticides, bool _nonrenewableEnergy) public returns (uint scoreId) {
     EnvImpact memory envImpact = EnvImpact(_plastics, _pesticides, _herbicides, _nonrenewableEnergy);
     scores[scoreCount] = Score(envImpact, _upc, _productionDate);
     return scoreCount++;
   }
-
-  // function getProduct(uint _productId) public view returns (string memory name, string memory manufacturer) {
-  //   return (products[_productId].name, products[_productId].manufacturer);
-  // }
 
   function getScoreTotal(uint _upc, uint _productionDate) public view returns (int score) {
     int scoreTotal = 0;
@@ -66,7 +51,27 @@ contract Ratings {
       }
     }
     return productScoreCount == 0 ? -1 : scoreTotal/productScoreCount;
+  }
+  
+  function getScoreCountPerProduct(uint _upc) private view returns (uint total) {
+      uint total = 0;
+      for(uint i=0; i < scoreCount; i++) {
+        if(scores[i].upc == _upc) {
+            total++;
+        }
+    }
+    return total;
+  }
 
+  function getScoreHistory(uint _upc) public view returns (Score[] memory) {
+    Score[] memory scoresForProduct = new Score[](getScoreCountPerProduct(_upc));
+    uint count = 0;
+    for(uint i=0; i < scoreCount; i++) {
+        if(scores[i].upc == _upc) {
+            scoresForProduct[count++] = scores[i];
+        }
+    }
+    return scoresForProduct;
   }
   
 }

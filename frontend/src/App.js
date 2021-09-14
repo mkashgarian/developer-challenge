@@ -1,6 +1,17 @@
 import React, { useState } from 'react';
 import './App.css';
 import SupplyChain from './SupplyChain.tsx';
+import CssBaseline from '@material-ui/core/CssBaseline';
+import { createTheme, ThemeProvider } from '@material-ui/core';
+
+
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#3498DB'
+    }
+  }
+})
 
 function App() {
 
@@ -9,6 +20,9 @@ function App() {
   const [contractAddress, setContractAddress] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
 
+
+
+/*
   async function deployContract() {
     setLoading(true);
     setErrorMsg(null);
@@ -33,18 +47,24 @@ function App() {
     }
     setLoading(false);
   }
+  */
 
   return (
-    <div>
-      <button type="button" className="App-button" disabled={loading} onClick={deployContract}>{deployState} Contract</button>
+    <ThemeProvider theme={theme}>
+
+    {/* // <React.Fragment> */}
+      
+      {/* <button type="button" className="App-button" disabled={loading} onClick={deployContract}>{deployState} Contract</button>
       { contractAddress && <p>
         Contract Address: {contractAddress}
-      </p>}
+      </p>} */}
+            {/* <CssBaseline /> */}
 
       <SupplyChain
         contractAddress={contractAddress}
-      />
-    </div>
+        />
+    {/* </React.Fragment> */}
+    </ThemeProvider>
   );
 }
 
