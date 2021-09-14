@@ -2,9 +2,7 @@ global.TextEncoder = require("util").TextEncoder;
 global.TextDecoder = require("util").TextDecoder; 
 const { MongoClient } = require('mongodb');
 
-
 const { MONGO_URI } = require('./config');
-
 
 async function seed() {
     const mongoClient = new MongoClient(MONGO_URI);

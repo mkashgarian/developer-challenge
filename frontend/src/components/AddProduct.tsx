@@ -33,7 +33,7 @@ const useStyles = makeStyles({
   }
 })
 
-const AddProduct = (props: any) => {
+const Products = (props: any) => {
 
     const classes = useStyles();
     const [productName, setProductName] = useState('');
@@ -137,4 +137,4 @@ const AddProduct = (props: any) => {
       }
 }
 
-export default AddProduct;
+export default Products;

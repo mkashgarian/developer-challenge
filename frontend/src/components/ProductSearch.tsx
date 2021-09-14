@@ -61,7 +61,7 @@ const ProductSearch = (props: { getProduct: any}) => {
 
     const options: Highcharts.Options = {
         title: {
-            text: 'Average Score Over Time'
+            text: 'Environmental Impact'
         },
         series: [{
             name: 'Average Product Score',
@@ -177,10 +177,9 @@ const ProductSearch = (props: { getProduct: any}) => {
             setSeverity(`warning`);
             setStatusMsg(`No scores have been added for this product with this production date.`);
         } else {
-                setScore(score);
-                setStatusMsg('Success! We found your product along with its current scores.');
-                setSeverity(`success`);
-            
+            setScore(score);
+            setStatusMsg('Success! We found your product along with its current scores.');
+            setSeverity(`success`);
         } 
     }
 

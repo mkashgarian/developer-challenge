@@ -23,6 +23,7 @@ export default function ProductTable(props: any) {
   let [itemList, setItemList] = useState<any[]>([]);
 
   useEffect(() => {
+    let isMounted = true;
     async function fetch() {
       let response = await props.getAllItems();
       setItemList(response.product);
@@ -36,9 +37,9 @@ export default function ProductTable(props: any) {
       <Table className={classes.table} size="small" aria-label="a dense table">
         <TableHead>
           <TableRow>
-            <TableCell align="left">UPC</TableCell>
-            <TableCell align="left">Manufacturer</TableCell>
-            <TableCell align="left">Product Name</TableCell>
+            <TableCell align="left"><b>UPC</b></TableCell>
+            <TableCell align="left"><b>Manufacturer</b></TableCell>
+            <TableCell align="left"><b>Product Name</b></TableCell>
           </TableRow>
         </TableHead>
         <TableBody>

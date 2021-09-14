@@ -32,4 +32,10 @@ cd ..
 cd frontend
 npm i
 npm start
+cd ..
+
+# If you want to add fake products to MongoDB (this will delete existing products):
+cd backend
+node productSeed.js
 ```
+

@@ -3,7 +3,7 @@ import AppBar from '@material-ui/core/AppBar';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Box from '@material-ui/core/Box';
-import AddProduct from './components/AddProduct';
+import Products from './components/AddProduct';
 import AddScore from './components/AddScore';
 import ProductSearch from './components/ProductSearch';
 
@@ -23,13 +23,13 @@ const SupplyChain = (props: {contractAddress: string}) => {
         <div className='supply-chain'>
             <AppBar position="static">
                 <Tabs value={value} onChange={handleChange} centered aria-label="simple tabs example">
-                <Tab label="Add a Product" />
+                <Tab label="Products" />
                 <Tab label="Add a Score" />
                 <Tab label="Search for a Product" />
                 </Tabs>
             </AppBar>
             <TabPanel value={value} index={0}>
-                <AddProduct
+                <Products
                   getAllProducts={getAllProducts}
                   checkIfUpcExists={checkIfUpcExists}
                 />
