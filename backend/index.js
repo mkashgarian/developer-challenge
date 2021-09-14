@@ -72,7 +72,6 @@ app.post('/api/product', async (req, res) => {
       manufacturer: req.body.manufacturer,
       UPC: req.body.upc
     })
-    console.log("Response: " + JSON.stringify(response, null, 1));
     res.status(200).send(response)
   }
   catch(err) {
@@ -85,9 +84,7 @@ app.get('/api/product/:upc', async (req, res) => {
   try {
     const db = mongoClient.db('ratings');
     const collection = db.collection('product');
-    console.log("upc is: " + req.params.upc);
     let response = await collection.findOne({ UPC: parseInt(req.params.upc) });
-    console.log("Response getProduct: " + JSON.stringify(response, null, 1));
     if(response == null) {
       res.status(404).send('product not found');
     } else {
@@ -105,7 +102,6 @@ app.get('/api/product', async (req, res) => {
     const db = mongoClient.db('ratings');
     const collection = db.collection('product');
     let response = await collection.find({}).toArray();
-    console.log("Response get all products: " + JSON.stringify(response, null, 1));
     res.status(200).send(response);
   }
   catch(err) {
@@ -206,6 +202,23 @@ function calculateScore(dateRecords) {
   })
   return Math.floor(score/dateRecords.length);
 }
+
+// check if upc exists
+app.get('/api/:upc', async (req, res) => {
+  try {
+    const db = mongoClient.db('ratings');
+    const collection = db.collection('product');
+    const response = await collection.findOne({ UPC: parseInt(req.params.upc) });
+    if(response == null) {
+      res.status(200).send(false);
+    } else {
+      res.status(200).send(true);
+    }
+  }
+  catch(err) {
+    res.status(500).send({error: `${err.response && JSON.stringify(err.response.body) && err.response.text}\n${err.stack}`});
+  }
+});
 
 async function init() {
   const {
