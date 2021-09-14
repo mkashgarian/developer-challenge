@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './App.css';
-import SupplyChain from './SupplyChain.tsx';
+import SupplyChain from './components/SupplyChain.tsx';
 import { createTheme, ThemeProvider } from '@material-ui/core';
 
 const theme = createTheme({
@@ -46,14 +46,7 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
-      <button type="button" className="App-button" disabled={loading} onClick={deployContract}>{deployState} Contract</button>
-      { contractAddress && <p>
-        Contract Address: {contractAddress}
-      </p>}
-
-      <SupplyChain
-        contractAddress={contractAddress}
-        />
+      <SupplyChain/>
     </ThemeProvider>
   );
 }

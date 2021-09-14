@@ -3,16 +3,16 @@ import AppBar from '@material-ui/core/AppBar';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Box from '@material-ui/core/Box';
-import Products from './components/AddProduct';
-import AddScore from './components/AddScore';
-import ProductSearch from './components/ProductSearch';
+import Products from './AddProduct';
+import AddScore from './AddScore';
+import ProductSearch from './ProductSearch';
 
 interface Product  {
   name: string,
   manufacturer: string
 }
 
-const SupplyChain = (props: {contractAddress: string}) => {
+const SupplyChain = () => {
 
     const [value, setValue] = React.useState(0);  
     const handleChange = (event: any, newValue: any) => {

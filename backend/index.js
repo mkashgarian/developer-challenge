@@ -41,26 +41,6 @@ async function loadConfig() {
 
 app.use(bodyparser.json());
 
-
-app.post('/api/contract', async (req, res) => {
-  // Note: we really only want to deploy a new instance of the contract
-  //       when we are initializing our on-chain state for the first time.
-  //       After that the application should keep track of the contract address.
-  try {
-    let postRes = await swaggerClient.apis.default.constructor_post({
-      body: {},
-      "kld-from": fromAddress,
-      "kld-sync": "true"
-    });
-    res.status(200).send(postRes.body)
-    console.log("Deployed instance: " + postRes.body.contractAddress);
-  }
-  catch(err) {
-    res.status(500).send({error: `${err.response && JSON.stringify(err.response.body)}\n${err.stack}`});
-  }
-});
-
-
 // add product
 app.post('/api/product', async (req, res) => {
   try {
